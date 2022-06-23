@@ -24,7 +24,8 @@ find_package(
 
 # ==== Options ====
 set(CMAKE_CXX_STANDARD 14)
-add_compile_options(-Wall -Wextra -Werror -Wno-error=deprecated-declarations)
+# add_compile_options(-Wall -Wextra -Werror -Wno-error=deprecated-declarations)
+add_compile_options(-Wall)
 option(CMAKE_POSITION_INDEPENDENT_CODE "Build position independent code." ON)
 
 # ==== Catkin ====
@@ -56,7 +57,7 @@ catkin_package(
 set(_SAVE_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(../ouster_client ouster_client EXCLUDE_FROM_ALL)
-target_compile_options(ouster_client PRIVATE -Wno-deprecated-declarations)
+# target_compile_options(ouster_client PRIVATE -Wno-deprecated-declarations)
 message(STATUS "Ouster SDK client: Using EIGEN_MAX_ALIGN_BYTES = 32")
 target_compile_definitions(ouster_client PUBLIC EIGEN_MAX_ALIGN_BYTES=32)
 set(BUILD_SHARED_LIBS ${_SAVE_BUILD_SHARED_LIBS})
