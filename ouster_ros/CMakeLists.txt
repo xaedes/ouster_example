@@ -27,6 +27,7 @@ set(CMAKE_CXX_STANDARD 14)
 # add_compile_options(-Wall -Wextra -Werror -Wno-error=deprecated-declarations)
 add_compile_options(-Wall)
 option(CMAKE_POSITION_INDEPENDENT_CODE "Build position independent code." ON)
+option(OUSTER_ROS_BUILD_NODES "Build ros nodes." OFF)
 
 # ==== Catkin ====
 add_message_files(FILES PacketMsg.msg)
@@ -47,8 +48,11 @@ catkin_package(
     std_msgs
     sensor_msgs
     geometry_msgs
+    pcl_conversions
   DEPENDS
-    EIGEN3)
+    EIGEN3
+
+  )
 
 # ==== Libraries ====
 # Build static libraries and bundle them into ouster_ros using the `--whole-archive` flag. This is
@@ -69,30 +73,40 @@ include_directories(${_ouster_ros_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 add_definitions(-DEIGEN_MPL2_ONLY)
 
 add_library(ouster_ros src/ros.cpp)
-target_link_libraries(ouster_ros PUBLIC ${catkin_LIBRARIES} ouster_build pcl_common PRIVATE
+target_link_libraries(ouster_ros PUBLIC ${catkin_LIBRARIES} ouster_build ${PCL_LIBRARIES} PUBLIC
   -Wl,--whole-archive ouster_client -Wl,--no-whole-archive)
 target_compile_definitions(ouster_ros PUBLIC EIGEN_MAX_ALIGN_BYTES=32)
 add_dependencies(ouster_ros ${PROJECT_NAME}_gencpp)
 
 # ==== Executables ====
-add_executable(os_node src/os_node.cpp)
-target_link_libraries(os_node ouster_ros ${catkin_LIBRARIES})
-add_dependencies(os_node ${PROJECT_NAME}_gencpp)
+if(OUSTER_ROS_BUILD_NODES)
+  add_executable(os_node src/os_node.cpp)
+  target_link_libraries(os_node ouster_ros ${catkin_LIBRARIES})
+  add_dependencies(os_node ${PROJECT_NAME}_gencpp)
 
-add_executable(os_cloud_node src/os_cloud_node.cpp)
-target_link_libraries(os_cloud_node ouster_ros ${catkin_LIBRARIES})
-add_dependencies(os_cloud_node ${PROJECT_NAME}_gencpp)
+  add_executable(os_cloud_node src/os_cloud_node.cpp)
+  target_link_libraries(os_cloud_node ouster_ros ${catkin_LIBRARIES})
+  add_dependencies(os_cloud_node ${PROJECT_NAME}_gencpp)
 
-add_executable(img_node src/img_node.cpp)
-target_link_libraries(img_node ouster_ros ${catkin_LIBRARIES})
-add_dependencies(img_node ${PROJECT_NAME}_gencpp)
+  add_executable(img_node src/img_node.cpp)
+  target_link_libraries(img_node ouster_ros ${catkin_LIBRARIES})
+  add_dependencies(img_node ${PROJECT_NAME}_gencpp)
+endif()
 
 # ==== Install ====
-install(
-  TARGETS ouster_ros os_node os_cloud_node img_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+if(OUSTER_ROS_BUILD_NODES)
+  install(
+    TARGETS ouster_ros os_node os_cloud_node img_node
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+else()
+  install(
+    TARGETS ouster_ros
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif()
 install(
   DIRECTORY ${_ouster_ros_INCLUDE_DIRS}
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
