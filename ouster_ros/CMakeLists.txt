@@ -27,7 +27,7 @@ set(CMAKE_CXX_STANDARD 14)
 # add_compile_options(-Wall -Wextra -Werror -Wno-error=deprecated-declarations)
 add_compile_options(-Wall)
 option(CMAKE_POSITION_INDEPENDENT_CODE "Build position independent code." ON)
-option(OUSTER_ROS_BUILD_NODES "Build ros nodes." OFF)
+option(OUSTER_ROS_BUILD_NODES "Build ros nodes." ON)
 
 # ==== Catkin ====
 add_message_files(FILES PacketMsg.msg)
